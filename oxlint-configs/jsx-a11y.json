@@ -6,6 +6,7 @@
 		"jsx-a11y/anchor-is-valid": 2,
 		"jsx-a11y/aria-activedescendant-has-tabindex": 2,
 		"jsx-a11y/aria-props": 2,
+		"jsx-a11y/aria-proptypes": 2,
 		"jsx-a11y/aria-role": 2,
 		"jsx-a11y/aria-unsupported-elements": 2,
 		"jsx-a11y/autocomplete-valid": 2,
@@ -24,6 +25,13 @@
 				"allowExpressionValues": true,
 				"roles": ["tabpanel"],
 				"tags": []
+			}
+		],
+		"jsx-a11y/no-static-element-interactions": [
+			2,
+			{
+				"allowExpressionValues": true,
+				"handlers": ["onClick", "onMouseDown", "onMouseUp", "onKeyPress", "onKeyDown", "onKeyUp"]
 			}
 		],
 		"jsx-a11y/no-access-key": 2,

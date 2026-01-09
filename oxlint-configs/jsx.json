@@ -20,6 +20,7 @@
 				"checkKeyMustBeforeSpread": true
 			}
 		],
+		"react/jsx-max-depth": 0,
 		"react/jsx-no-comment-textnodes": 2,
 		"react/jsx-no-duplicate-props": 2,
 		"react/jsx-no-script-url": 2,
@@ -31,6 +32,7 @@
 				"allowExpressions": true
 			}
 		],
+		"react/jsx-props-no-spreading": 0,
 		"unicorn/consistent-function-scoping": 0
 	}
 }

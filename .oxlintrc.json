@@ -1,10 +1,10 @@
 {
 	"$schema": "./node_modules/oxlint/configuration_schema.json",
 	"extends": [
-		"oxlint-configs/common.oxlintrc.json",
-		"oxlint-configs/node.oxlintrc.json",
-		"oxlint-configs/typescript.oxlintrc.json",
-		"oxlint-configs/prettier.oxlintrc.json"
+		"oxlint-configs/common.json",
+		"oxlint-configs/node.json",
+		"oxlint-configs/typescript.json",
+		"oxlint-configs/prettier.json"
 	],
 	"rules": {
 		"id-length": [

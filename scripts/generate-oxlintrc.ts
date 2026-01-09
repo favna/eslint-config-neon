@@ -16,11 +16,16 @@ import {
 	typescriptRules,
 	unicornRules,
 	vitestRules,
+	typescriptTypeAwareRules,
 } from "./generated-oxlint-rules";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const generatedRules = {
+type RuleRecord = Record<string, unknown>;
+
+type OxlintJsPlugin = { name: string; specifier: string };
+
+const OXLINT_SUPPORTED_RULES: Record<string, "off"> = {
 	...eslintRules,
 	...importRules,
 	...jestRules,
@@ -35,91 +40,446 @@ const generatedRules = {
 	...typescriptRules,
 	...unicornRules,
 	...vitestRules,
+	...typescriptTypeAwareRules,
 };
 
-const configPlugins: Record<string, string[]> = {
-	common: ["import", "jsdoc", "unicorn", "promise"],
-	astro: ["react"],
-	browser: ["unicorn"],
-	cypress: ["import"],
-	"jsx-a11y": ["jsx-a11y"],
-	jsx: ["react", "unicorn"],
-	next: ["nextjs"],
-	node: ["node", "unicorn"],
-	prettier: ["unicorn"],
-	react: ["react", "unicorn"],
-	svelte: ["import"],
-	typescript: ["import", "jsdoc", "typescript"],
-};
+const OXLINT_PLUGIN_ORDER = [
+	"import",
+	"jsdoc",
+	"jsx-a11y",
+	"jest",
+	"vitest",
+	"nextjs",
+	"node",
+	"promise",
+	"react",
+	"react-hooks",
+	"react-perf",
+	"typescript",
+	"unicorn",
+] as const;
 
-const configEnv: Record<string, Record<string, boolean>> = {
+const CONFIG_ENV_BY_NAME: Record<string, Record<string, boolean>> = {
 	browser: { browser: true },
 	node: { node: true },
 };
 
+/**
+ * When oxlint doesn't support a rule natively, we can pass it through as a JS plugin rule.
+ * We deliberately alias all JS plugins under a custom namespace so it's obvious which rules
+ * are coming from JS plugins (and to avoid conflicts with oxlint's reserved plugin names).
+ */
+const JS_PLUGIN_ALIAS_SCOPE = "@neon";
+const JS_PLUGIN_ALIAS_PREFIX = "eslint-";
+
+// Some ESLint plugins currently rely on APIs oxlint doesn't implement in its JS plugin bridge.
+// We still emit them (so they're visible in generated configs), but we scope them to a pattern
+// that shouldn't match real project files to avoid hard runtime errors.
+const JS_PLUGIN_NAMESPACE_DISABLED = new Set<string>([
+	"import-x", // uses `context.parserPath` in resolver code paths
+]);
+
+const JS_PLUGIN_SPECIFIER_BY_NAMESPACE: Record<string, string> = {
+	// Scoped plugins
+	"@angular-eslint": "@angular-eslint/eslint-plugin",
+	"@angular-eslint/template": "@angular-eslint/eslint-plugin-template",
+	"@next/next": "@next/eslint-plugin-next",
+	"@stylistic": "@stylistic/eslint-plugin",
+
+	// Unscoped plugins
+	"import-x": "eslint-plugin-import-x",
+	react: "eslint-plugin-react",
+	"react-hooks": "eslint-plugin-react-hooks",
+	"react-refresh": "eslint-plugin-react-refresh",
+	rxjs: "eslint-plugin-rxjs",
+	"rxjs-angular": "eslint-plugin-rxjs-angular",
+	sonarjs: "eslint-plugin-sonarjs",
+	svelte3: "eslint-plugin-svelte3",
+	tsdoc: "eslint-plugin-tsdoc",
+	"typescript-sort-keys": "eslint-plugin-typescript-sort-keys",
+	unicorn: "eslint-plugin-unicorn",
+	vue: "eslint-plugin-vue",
+	// Note: native oxlint plugins (import/jsdoc/node/...) are supported and will be matched first.
+};
+
+function normalizeJsPluginRuleName(rule: string): string {
+	let normalized = rule;
+
+	// Flatten scoped namespaces used by some configs/plugins
+	for (const prefix of ["@stylistic/js/", "@stylistic/ts/", "@stylistic/jsx/"]) {
+		if (normalized.startsWith(prefix)) {
+			normalized = `@stylistic/${normalized.slice(prefix.length)}`;
+			break;
+		}
+	}
+
+	// Alias normalization (eslint-config-prettier may include both keys for compatibility)
+	if (normalized === "@stylistic/func-call-spacing") {
+		normalized = "@stylistic/function-call-spacing";
+	}
+
+	return normalized;
+}
+
+function sanitizeForJsPluginAlias(namespace: string): string {
+	return namespace.replace(/^@/, "").replaceAll("/", "-");
+}
+
+function parsePluginRuleName(ruleName: string): { localRuleName: string; namespace: string } | null {
+	if (!ruleName.includes("/")) return null;
+
+	// Scoped plugin:
+	// - "@scope/rule" (e.g. "@stylistic/no-extra-semi")
+	// - "@scope/name/rule" (e.g. "@angular-eslint/template/alt-text")
+	if (ruleName.startsWith("@")) {
+		const firstSlash = ruleName.indexOf("/");
+		if (firstSlash === -1) return null;
+		const secondSlash = ruleName.indexOf("/", firstSlash + 1);
+		if (secondSlash === -1) {
+			return {
+				namespace: ruleName.slice(0, firstSlash),
+				localRuleName: ruleName.slice(firstSlash + 1),
+			};
+		}
+
+		return {
+			namespace: ruleName.slice(0, secondSlash),
+			localRuleName: ruleName.slice(secondSlash + 1),
+		};
+	}
+
+	// Unscoped plugin: "plugin/rule"
+	const firstSlash = ruleName.indexOf("/");
+	return {
+		namespace: ruleName.slice(0, firstSlash),
+		localRuleName: ruleName.slice(firstSlash + 1),
+	};
+}
+
+function getAliasedJsPlugin(namespace: string): OxlintJsPlugin | null {
+	const specifier = JS_PLUGIN_SPECIFIER_BY_NAMESPACE[namespace];
+	if (!specifier) return null;
+
+	return {
+		name: `${JS_PLUGIN_ALIAS_SCOPE}/${JS_PLUGIN_ALIAS_PREFIX}${sanitizeForJsPluginAlias(namespace)}`,
+		specifier,
+	};
+}
+
+function toSourceRuleName(oxlintRuleName: string): string {
+	if (oxlintRuleName.startsWith("node/")) {
+		return oxlintRuleName.replace("node/", "n/");
+	}
+
+	// ESLint's Next.js plugin uses "@next/next/*", but oxlint uses "nextjs/*".
+	if (oxlintRuleName.startsWith("nextjs/")) {
+		return oxlintRuleName.replace("nextjs/", "@next/next/");
+	}
+
+	// eslint-plugin-import-x uses the "import-x/" namespace, but oxlint uses "import/".
+	if (oxlintRuleName.startsWith("import/")) {
+		return oxlintRuleName.replace("import/", "import-x/");
+	}
+
+	if (oxlintRuleName.startsWith("typescript/")) {
+		return oxlintRuleName.replace("typescript/", "@typescript-eslint/");
+	}
+
+	return oxlintRuleName;
+}
+
+function toOxlintRuleName(generatedRuleName: string): string {
+	// ESLint's Next.js plugin uses "@next/next/*", but oxlint uses "nextjs/*".
+	if (generatedRuleName.startsWith("@next/next/")) {
+		return generatedRuleName.replace("@next/next/", "nextjs/");
+	}
+
+	if (generatedRuleName.startsWith("@typescript-eslint/")) {
+		return generatedRuleName.replace("@typescript-eslint/", "typescript/");
+	}
+
+	return generatedRuleName;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null;
+}
+
+function extractRulesFromConfigExport(configExport: unknown): RuleRecord {
+	const rules: RuleRecord = {};
+
+	const mergeRules = (maybeRules: unknown) => {
+		if (!isRecord(maybeRules)) return;
+		Object.assign(rules, maybeRules);
+	};
+
+	if (Array.isArray(configExport)) {
+		for (const item of configExport) {
+			if (!isRecord(item)) continue;
+			mergeRules(item.rules);
+		}
+
+		return rules;
+	}
+
+	// Support odd shapes (kept for backwards compatibility with older exports):
+	// - FlatConfig object with a `rules` field
+	// - A plain rules object (exported directly)
+	if (isRecord(configExport)) {
+		if ("rules" in configExport) {
+			mergeRules(configExport.rules);
+		} else if (
+			"files" in configExport ||
+			"languageOptions" in configExport ||
+			"plugins" in configExport ||
+			"settings" in configExport ||
+			"processor" in configExport ||
+			"linterOptions" in configExport
+		) {
+			mergeRules((configExport as { rules?: unknown }).rules);
+		} else {
+			Object.assign(rules, configExport);
+		}
+	}
+
+	return rules;
+}
+
+type OxlintOverride = {
+	files: string[];
+	rules: RuleRecord;
+};
+
+type JsPluginOverridesExtraction = { jsPlugins: OxlintJsPlugin[]; overrides: OxlintOverride[] };
+
+const jsPluginRuleNamesBySpecifier = new Map<string, Set<string> | null>();
+
+async function getJsPluginRuleNames(specifier: string): Promise<Set<string> | null> {
+	if (jsPluginRuleNamesBySpecifier.has(specifier)) {
+		return jsPluginRuleNamesBySpecifier.get(specifier) ?? null;
+	}
+
+	try {
+		const mod = await import(specifier);
+		const plugin = (mod as { default?: unknown }).default ?? mod;
+
+		if (!isRecord(plugin) || !("rules" in plugin) || !isRecord((plugin as { rules?: unknown }).rules)) {
+			jsPluginRuleNamesBySpecifier.set(specifier, null);
+			return null;
+		}
+
+		const rules = (plugin as { rules: Record<string, unknown> }).rules;
+		const ruleNames = new Set(Object.keys(rules));
+		jsPluginRuleNamesBySpecifier.set(specifier, ruleNames);
+		return ruleNames;
+	} catch {
+		jsPluginRuleNamesBySpecifier.set(specifier, null);
+		return null;
+	}
+}
+
+const JS_PLUGIN_FILES_BY_NAMESPACE: Record<string, string[]> = {
+	// Framework-specific formats
+	vue: ["**/*.vue"],
+	svelte3: ["**/*.svelte"],
+	astro: ["**/*.astro"],
+	mdx: ["**/*.mdx"],
+	"@angular-eslint/template": ["**/*.html"],
+
+	// Code plugins
+	"@angular-eslint": ["**/*.ts"],
+	"typescript-sort-keys": ["**/*.{ts,tsx,cts,mts}"],
+	tsdoc: ["**/*.{ts,tsx,cts,mts}"],
+
+	// Defaults (JS/TS)
+	react: ["**/*.{js,jsx,ts,tsx,cjs,mjs,cts,mts}"],
+	"react-hooks": ["**/*.{js,jsx,ts,tsx,cjs,mjs,cts,mts}"],
+	"react-refresh": ["**/*.{js,jsx,ts,tsx,cjs,mjs,cts,mts}"],
+	"import-x": ["**/*.{js,jsx,ts,tsx,cjs,mjs,cts,mts}"],
+	sonarjs: ["**/*.{js,jsx,ts,tsx,cjs,mjs,cts,mts}"],
+	rxjs: ["**/*.{js,jsx,ts,tsx,cjs,mjs,cts,mts}"],
+	"rxjs-angular": ["**/*.{js,jsx,ts,tsx,cjs,mjs,cts,mts}"],
+	unicorn: ["**/*.{js,jsx,ts,tsx,cjs,mjs,cts,mts}"],
+	"@stylistic": ["**/*.{js,jsx,ts,tsx,cjs,mjs,cts,mts}"],
+	"@next/next": ["**/*.{js,jsx,ts,tsx,cjs,mjs,cts,mts}"],
+};
+
+function getJsPluginFiles(namespace: string): string[] {
+	if (JS_PLUGIN_NAMESPACE_DISABLED.has(namespace)) {
+		return ["**/*.oxlint-disabled"];
+	}
+
+	return JS_PLUGIN_FILES_BY_NAMESPACE[namespace] ?? ["**/*.{js,jsx,ts,tsx,cjs,mjs,cts,mts}"];
+}
+
+async function getUnmatchedJsPluginOverrides(
+	fileRules: RuleRecord,
+	matchedSourceRuleNames: ReadonlySet<string>,
+): Promise<JsPluginOverridesExtraction> {
+	const jsPluginsByName = new Map<string, OxlintJsPlugin>();
+	const overridesByPluginName = new Map<string, OxlintOverride>();
+
+	const sortedRuleNames = Object.keys(fileRules).sort((a, b) => a.localeCompare(b));
+	for (const rawRuleName of sortedRuleNames) {
+		if (matchedSourceRuleNames.has(rawRuleName)) continue;
+
+		const value = fileRules[rawRuleName];
+		const normalizedRuleName = normalizeJsPluginRuleName(rawRuleName);
+		const parsed = parsePluginRuleName(normalizedRuleName);
+		if (!parsed) continue;
+
+		const jsPlugin = getAliasedJsPlugin(parsed.namespace);
+		if (!jsPlugin) continue;
+
+		// Skip rules that are not present in the referenced JS plugin package.
+		const jsPluginRuleNames = await getJsPluginRuleNames(jsPlugin.specifier);
+		if (!jsPluginRuleNames?.has(parsed.localRuleName)) continue;
+
+		jsPluginsByName.set(jsPlugin.name, jsPlugin);
+
+		const override = overridesByPluginName.get(jsPlugin.name) ?? {
+			files: getJsPluginFiles(parsed.namespace),
+			rules: {},
+		};
+
+		// Prefix/alias the namespace to clearly indicate JS plugin passthrough.
+		const aliasedRuleName = `${jsPlugin.name}/${parsed.localRuleName}`;
+		override.rules[aliasedRuleName] = value;
+		overridesByPluginName.set(jsPlugin.name, override);
+	}
+
+	const jsPlugins = [...jsPluginsByName.values()].sort((a, b) => a.name.localeCompare(b.name));
+
+	// Consolidate overrides that share the same `files` patterns.
+	// This avoids emitting many overrides that differ only by rules contents.
+	const overridesByFilesKey = new Map<string, OxlintOverride>();
+
+	const stablePluginOrder = [...overridesByPluginName.keys()].sort((a, b) => a.localeCompare(b));
+	for (const pluginName of stablePluginOrder) {
+		const override = overridesByPluginName.get(pluginName);
+		if (!override) continue;
+
+		const filesKey = JSON.stringify([...override.files].sort((a, b) => a.localeCompare(b)));
+		const existing = overridesByFilesKey.get(filesKey);
+		if (!existing) {
+			overridesByFilesKey.set(filesKey, {
+				files: override.files,
+				rules: { ...override.rules },
+			});
+			continue;
+		}
+
+		// Merge in stable order. Rule keys are namespaced, so collisions are unlikely;
+		// if they do happen, later ones override earlier ones.
+		Object.assign(existing.rules, override.rules);
+	}
+
+	const overrides = [...overridesByFilesKey.values()].sort((a, b) => {
+		const aKey = a.files.join("|");
+		const bKey = b.files.join("|");
+		return aKey.localeCompare(bKey);
+	});
+
+	return { jsPlugins, overrides };
+}
+
+function inferPluginsFromRules(rules: RuleRecord): string[] {
+	const present = new Set<string>();
+
+	for (const ruleName of Object.keys(rules)) {
+		// JS plugins are separate from oxlint-native plugins.
+		if (ruleName.startsWith("@stylistic/")) continue;
+
+		// Next.js rules are emitted as "nextjs/*"
+		if (ruleName.startsWith("nextjs/")) {
+			present.add("nextjs");
+			continue;
+		}
+
+		const slashIndex = ruleName.indexOf("/");
+		if (slashIndex === -1) continue; // core rules
+
+		present.add(ruleName.slice(0, slashIndex));
+	}
+
+	return OXLINT_PLUGIN_ORDER.filter((plugin) => present.has(plugin));
+}
+
+async function writeJsonFile(filePath: string, value: unknown): Promise<void> {
+	const json = `${JSON.stringify(value, null, 2)}\n`;
+	const tmpPath = `${filePath}.tmp`;
+	await fs.writeFile(tmpPath, json, "utf8");
+	await fs.rename(tmpPath, filePath);
+}
+
 const srcDir = path.join(__dirname, "..", "src");
 const ruleFiles = (await fs.readdir(srcDir))
 	.filter((file) => file.endsWith(".ts"))
-	.map((file) => path.join(srcDir, file));
+	.map((file) => path.join(srcDir, file))
+	.sort((a, b) => a.localeCompare(b));
 
 const configsDir = path.join(__dirname, "..", "oxlint-configs");
 await fs.mkdir(configsDir, { recursive: true });
 
-function mapRuleName(rule: string): string {
-	if (rule.startsWith("node/")) {
-		return rule.replace("node/", "n/");
-	}
-
-	return rule;
-}
+const supportedRuleNamesInOrder = Object.keys(OXLINT_SUPPORTED_RULES);
 
 for (const file of ruleFiles) {
 	const module = await import(pathToFileURL(file).href);
-	const config = module.default;
+	const configExport = module.default;
 
-	const fileRules: Record<string, number> = {};
+	const fileRules = extractRulesFromConfigExport(configExport);
 
-	if (Array.isArray(config)) {
-		for (const item of config) {
-			if (item?.rules) {
-				Object.assign(fileRules, item.rules);
-			}
-		}
-	} else if (typeof config === "object" && config !== null) {
-		if ("files" in config) {
-			if (config.rules) {
-				Object.assign(fileRules, config.rules);
-			}
-		} else {
-			Object.assign(fileRules, config);
+	const matchedSourceRuleNames = new Set<string>();
+	const nativeMatchingRules: RuleRecord = {};
+	for (const generatedRuleName of supportedRuleNamesInOrder) {
+		const oxlintRuleName = toOxlintRuleName(generatedRuleName);
+		const sourceRuleName = toSourceRuleName(oxlintRuleName);
+
+		if (sourceRuleName in fileRules) {
+			nativeMatchingRules[oxlintRuleName] = fileRules[sourceRuleName];
+			matchedSourceRuleNames.add(sourceRuleName);
 		}
 	}
 
-	const matchingRules: Record<string, number> = {};
-	for (const rule of Object.keys(generatedRules)) {
-		const srcRule = mapRuleName(rule);
-		if (srcRule in fileRules) {
-			matchingRules[rule] = fileRules[srcRule]!;
-		}
-	}
+	// JS plugin rules: passthrough for rules oxlint doesn't support natively
+	const { overrides: jsPluginOverrides, jsPlugins } = await getUnmatchedJsPluginOverrides(
+		fileRules,
+		matchedSourceRuleNames,
+	);
 
-	if (Object.keys(matchingRules).length > 0) {
-		const baseName = path.basename(file, ".ts");
+	const overrides = jsPluginOverrides;
 
-		// Get plugins and env for this config
-		const plugins = configPlugins[baseName] ?? [];
-		const env = configEnv[baseName];
+	const baseName = path.basename(file, ".ts");
 
-		const oxlintrc = {
-			...(env && { env }),
-			plugins,
-			rules: matchingRules,
+	const plugins = inferPluginsFromRules(nativeMatchingRules);
+	const env = CONFIG_ENV_BY_NAME[baseName];
+
+	// 1) Native oxlint config (no JS plugins)
+	const nativeOxlintrc = {
+		...(env && { env }),
+		plugins,
+		rules: nativeMatchingRules,
+	};
+
+	await writeJsonFile(path.join(configsDir, `${baseName}.json`), nativeOxlintrc);
+
+	console.log(
+		`Generated ${baseName}.json with ${Object.keys(nativeMatchingRules).length} rules and ${plugins.length} plugins`,
+	);
+
+	// 2) JS plugin passthrough config (optional)
+	if (jsPlugins.length > 0 || overrides.length > 0) {
+		const jsPluginsOxlintrc = {
+			jsPlugins,
+			...(overrides.length > 0 && { overrides }),
+			rules: {},
+			plugins: [],
 		};
 
-		await fs.writeFile(path.join(configsDir, `${baseName}.oxlintrc.json`), JSON.stringify(oxlintrc, null, 2));
+		await writeJsonFile(path.join(configsDir, `${baseName}.jsplugins.json`), jsPluginsOxlintrc);
 
 		console.log(
-			`Generated ${baseName}.oxlintrc.json with ${Object.keys(matchingRules).length} rules and ${plugins.length} plugins`,
+			`Generated ${baseName}.jsplugins.json with ${jsPlugins.length} jsPlugins and ${overrides.length} overrides`,
 		);
 	}
 }

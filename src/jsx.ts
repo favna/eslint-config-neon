@@ -58,49 +58,49 @@ const rules: TSESLint.FlatConfig.Rules = {
 	"unicorn/consistent-function-scoping": 0,
 
 	// Stylistic
-	"@stylistic/jsx/jsx-child-element-spacing": 0,
-	"@stylistic/jsx/jsx-closing-bracket-location": [2, "line-aligned"],
-	"@stylistic/jsx/jsx-closing-tag-location": 2,
-	"@stylistic/jsx/jsx-curly-brace-presence": [
+	"@stylistic/jsx-child-element-spacing": 0,
+	"@stylistic/jsx-closing-bracket-location": [2, "line-aligned"],
+	"@stylistic/jsx-closing-tag-location": 2,
+	"@stylistic/jsx-curly-brace-presence": [
 		2,
 		{
 			children: "never",
 			props: "never",
 		},
 	],
-	"@stylistic/jsx/jsx-curly-newline": 2,
-	"@stylistic/jsx/jsx-curly-spacing": [
+	"@stylistic/jsx-curly-newline": 2,
+	"@stylistic/jsx-curly-spacing": [
 		2,
 		"never",
 		{
 			allowMultiline: true,
 		},
 	],
-	"@stylistic/jsx/jsx-equals-spacing": [2, "never"],
-	"@stylistic/jsx/jsx-first-prop-new-line": [2, "multiline-multiprop"],
-	"@stylistic/jsx/jsx-max-props-per-line": [
+	"@stylistic/jsx-equals-spacing": [2, "never"],
+	"@stylistic/jsx-first-prop-new-line": [2, "multiline-multiprop"],
+	"@stylistic/jsx-max-props-per-line": [
 		2,
 		{
 			maximum: 3,
 			when: "multiline",
 		},
 	],
-	"@stylistic/jsx/jsx-newline": [
+	"@stylistic/jsx-newline": [
 		2,
 		{
 			prevent: true,
 		},
 	],
-	"@stylistic/jsx/jsx-one-expression-per-line": 0,
-	"@stylistic/jsx/jsx-pascal-case": [
+	"@stylistic/jsx-one-expression-per-line": 0,
+	"@stylistic/jsx-pascal-case": [
 		2,
 		{
 			ignore: ["h{}", "h2", "h3", "h4", "h5", "h6", "p", "a", "ul", "ol", "li", "img", "div", "span", "dl", "dt", "dd"],
 		},
 	],
-	"@stylistic/jsx/jsx-props-no-multi-spaces": 2,
-	"@stylistic/jsx/jsx-sort-props": 2,
-	"@stylistic/jsx/jsx-tag-spacing": [
+	"@stylistic/jsx-props-no-multi-spaces": 2,
+	"@stylistic/jsx-sort-props": 2,
+	"@stylistic/jsx-tag-spacing": [
 		2,
 		{
 			afterOpening: "never",
@@ -108,8 +108,8 @@ const rules: TSESLint.FlatConfig.Rules = {
 			closingSlash: "never",
 		},
 	],
-	"@stylistic/jsx/jsx-wrap-multilines": 0,
-	"@stylistic/jsx/jsx-indent": [2, "tab"],
+	"@stylistic/jsx-wrap-multilines": 0,
+	"@stylistic/jsx-indent": [2, "tab"],
 };
 
 const settings: TSESLint.FlatConfig.Settings = {

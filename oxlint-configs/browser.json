@@ -4,6 +4,7 @@
 	},
 	"plugins": ["unicorn"],
 	"rules": {
+		"unicorn/prefer-keyboard-event-key": 2,
 		"unicorn/prefer-dom-node-append": 2,
 		"unicorn/prefer-dom-node-dataset": 2,
 		"unicorn/prefer-dom-node-remove": 2,

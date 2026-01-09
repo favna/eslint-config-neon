@@ -4,7 +4,7 @@ import common from "./dist/esm/common.mjs";
 import node from "./dist/esm/node.mjs";
 import prettier from "./dist/esm/prettier.mjs";
 import typescript from "./dist/esm/typescript.mjs";
-import oxlint from "eslint-plugin-oxlint";
+// import oxlint from "eslint-plugin-oxlint";
 
 /**
  * @type {import('@typescript-eslint/utils').TSESLint.FlatConfig.ConfigArray}
@@ -21,7 +21,7 @@ const config = [
 		},
 	},
 	...prettier,
-	...oxlint.buildFromOxlintConfigFile("./.oxlintrc.json"),
+	// ...oxlint.buildFromOxlintConfigFile("./.oxlintrc.json"),
 ];
 
 export default config;

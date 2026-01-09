@@ -1,6 +1,4 @@
 import eslintPluginStylistic from "@stylistic/eslint-plugin";
-import eslintPluginStylisticJsx from "@stylistic/eslint-plugin-jsx";
-import eslintPluginStylisticTs from "@stylistic/eslint-plugin-ts";
 import type { TSESLint } from "@typescript-eslint/utils";
 import eslintPluginImport from "eslint-plugin-import-x";
 import eslintPluginJsdoc from "eslint-plugin-jsdoc";
@@ -514,36 +512,36 @@ const rules: TSESLint.FlatConfig.Rules = {
 	yoda: [2, "never"],
 
 	// Stylistic
-	"@stylistic/js/array-bracket-newline": [
+	"@stylistic/array-bracket-newline": [
 		2,
 		{
 			multiline: true,
 		},
 	],
-	"@stylistic/js/array-bracket-spacing": [2, "never"],
-	"@stylistic/js/array-element-newline": [
+	"@stylistic/array-bracket-spacing": [2, "never"],
+	"@stylistic/array-element-newline": [
 		2,
 		{
 			multiline: true,
 		},
 	],
-	"@stylistic/js/arrow-parens": [2, "always"],
-	"@stylistic/js/arrow-spacing": [
+	"@stylistic/arrow-parens": [2, "always"],
+	"@stylistic/arrow-spacing": [
 		2,
 		{
 			after: true,
 			before: true,
 		},
 	],
-	"@stylistic/js/block-spacing": [2, "always"],
-	"@stylistic/js/brace-style": [
+	"@stylistic/block-spacing": [2, "always"],
+	"@stylistic/brace-style": [
 		2,
 		"1tbs",
 		{
 			allowSingleLine: false,
 		},
 	],
-	"@stylistic/js/comma-dangle": [
+	"@stylistic/comma-dangle": [
 		2,
 		{
 			arrays: "always-multiline",
@@ -553,72 +551,72 @@ const rules: TSESLint.FlatConfig.Rules = {
 			objects: "always-multiline",
 		},
 	],
-	"@stylistic/js/comma-spacing": [
+	"@stylistic/comma-spacing": [
 		2,
 		{
 			after: true,
 			before: false,
 		},
 	],
-	"@stylistic/js/comma-style": [2, "last"],
-	"@stylistic/js/computed-property-spacing": [2, "never"],
-	"@stylistic/js/dot-location": [2, "property"],
-	"@stylistic/js/eol-last": 2,
-	"@stylistic/js/func-call-spacing": [2, "never"],
-	"@stylistic/js/function-call-argument-newline": [2, "consistent"],
-	"@stylistic/js/function-paren-newline": [2, "consistent"],
-	"@stylistic/js/generator-star-spacing": [
+	"@stylistic/comma-style": [2, "last"],
+	"@stylistic/computed-property-spacing": [2, "never"],
+	"@stylistic/dot-location": [2, "property"],
+	"@stylistic/eol-last": 2,
+	"@stylistic/function-call-spacing": [2, "never"],
+	"@stylistic/function-call-argument-newline": [2, "consistent"],
+	"@stylistic/function-paren-newline": [2, "consistent"],
+	"@stylistic/generator-star-spacing": [
 		2,
 		{
 			after: false,
 			before: true,
 		},
 	],
-	"@stylistic/js/implicit-arrow-linebreak": [2, "beside"],
-	"@stylistic/js/indent": [2, "tab"],
-	"@stylistic/js/jsx-quotes": [2, "prefer-single"],
-	"@stylistic/js/key-spacing": [
+	"@stylistic/implicit-arrow-linebreak": [2, "beside"],
+	"@stylistic/indent": [2, "tab"],
+	"@stylistic/jsx-quotes": [2, "prefer-single"],
+	"@stylistic/key-spacing": [
 		2,
 		{
 			afterColon: true,
 			beforeColon: false,
 		},
 	],
-	"@stylistic/js/keyword-spacing": [
+	"@stylistic/keyword-spacing": [
 		2,
 		{
 			after: true,
 			before: true,
 		},
 	],
-	"@stylistic/js/line-comment-position": [
+	"@stylistic/line-comment-position": [
 		2,
 		{
 			position: "above",
 		},
 	],
-	"@stylistic/js/linebreak-style": [2, "unix"],
-	"@stylistic/js/lines-around-comment": 0,
-	"@stylistic/js/lines-between-class-members": [2, "always"],
-	"@stylistic/js/max-len": 0,
-	"@stylistic/js/max-statements-per-line": [
+	"@stylistic/linebreak-style": [2, "unix"],
+	"@stylistic/lines-around-comment": 0,
+	"@stylistic/lines-between-class-members": [2, "always"],
+	"@stylistic/max-len": 0,
+	"@stylistic/max-statements-per-line": [
 		2,
 		{
 			max: 1,
 		},
 	],
-	"@stylistic/js/multiline-comment-style": 0,
-	"@stylistic/js/multiline-ternary": 0,
-	"@stylistic/js/new-parens": 2,
-	"@stylistic/js/newline-per-chained-call": 0,
-	"@stylistic/js/no-confusing-arrow": 0,
-	"@stylistic/js/no-extra-parens": 2,
-	"@stylistic/js/no-extra-semi": 2,
-	"@stylistic/js/no-floating-decimal": 2,
-	"@stylistic/js/no-mixed-operators": 0,
-	"@stylistic/js/no-mixed-spaces-and-tabs": 2,
-	"@stylistic/js/no-multi-spaces": 2,
-	"@stylistic/js/no-multiple-empty-lines": [
+	"@stylistic/multiline-comment-style": 0,
+	"@stylistic/multiline-ternary": 0,
+	"@stylistic/new-parens": 2,
+	"@stylistic/newline-per-chained-call": 0,
+	"@stylistic/no-confusing-arrow": 0,
+	"@stylistic/no-extra-parens": 2,
+	"@stylistic/no-extra-semi": 2,
+	"@stylistic/no-floating-decimal": 2,
+	"@stylistic/no-mixed-operators": 0,
+	"@stylistic/no-mixed-spaces-and-tabs": 2,
+	"@stylistic/no-multi-spaces": 2,
+	"@stylistic/no-multiple-empty-lines": [
 		2,
 		{
 			max: 1,
@@ -626,32 +624,32 @@ const rules: TSESLint.FlatConfig.Rules = {
 			maxEOF: 1,
 		},
 	],
-	"@stylistic/js/no-tabs": [
+	"@stylistic/no-tabs": [
 		2,
 		{
 			allowIndentationTabs: true,
 		},
 	],
-	"@stylistic/js/no-trailing-spaces": 2,
-	"@stylistic/js/no-whitespace-before-property": 2,
-	"@stylistic/js/nonblock-statement-body-position": [2, "below"],
-	"@stylistic/js/object-curly-newline": [
+	"@stylistic/no-trailing-spaces": 2,
+	"@stylistic/no-whitespace-before-property": 2,
+	"@stylistic/nonblock-statement-body-position": [2, "below"],
+	"@stylistic/object-curly-newline": [
 		2,
 		{
 			multiline: true,
 		},
 	],
-	"@stylistic/js/object-curly-spacing": [2, "always"],
-	"@stylistic/js/object-property-newline": [
+	"@stylistic/object-curly-spacing": [2, "always"],
+	"@stylistic/object-property-newline": [
 		2,
 		{
 			allowAllPropertiesOnSameLine: false,
 		},
 	],
-	"@stylistic/js/one-var-declaration-per-line": 2,
-	"@stylistic/js/operator-linebreak": [2, "after"],
-	"@stylistic/js/padded-blocks": [2, "never"],
-	"@stylistic/js/padding-line-between-statements": [
+	"@stylistic/one-var-declaration-per-line": 2,
+	"@stylistic/operator-linebreak": [2, "after"],
+	"@stylistic/padded-blocks": [2, "never"],
+	"@stylistic/padding-line-between-statements": [
 		2,
 		{
 			blankLine: "always",
@@ -659,26 +657,26 @@ const rules: TSESLint.FlatConfig.Rules = {
 			prev: "multiline-block-like",
 		},
 	],
-	"@stylistic/js/quote-props": [
+	"@stylistic/quote-props": [
 		2,
 		"as-needed",
 		{
 			numbers: true,
 		},
 	],
-	"@stylistic/js/quotes": [2, "double"],
-	"@stylistic/js/rest-spread-spacing": [2, "never"],
-	"@stylistic/js/semi": [2, "always"],
-	"@stylistic/js/semi-spacing": [
+	"@stylistic/quotes": [2, "double"],
+	"@stylistic/rest-spread-spacing": [2, "never"],
+	"@stylistic/semi": [2, "always"],
+	"@stylistic/semi-spacing": [
 		2,
 		{
 			after: true,
 			before: false,
 		},
 	],
-	"@stylistic/js/semi-style": [2, "last"],
-	"@stylistic/js/space-before-blocks": [2, "always"],
-	"@stylistic/js/space-before-function-paren": [
+	"@stylistic/semi-style": [2, "last"],
+	"@stylistic/space-before-blocks": [2, "always"],
+	"@stylistic/space-before-function-paren": [
 		2,
 		{
 			anonymous: "always",
@@ -686,39 +684,39 @@ const rules: TSESLint.FlatConfig.Rules = {
 			named: "never",
 		},
 	],
-	"@stylistic/js/space-in-parens": [2, "never"],
-	"@stylistic/js/space-infix-ops": [
+	"@stylistic/space-in-parens": [2, "never"],
+	"@stylistic/space-infix-ops": [
 		2,
 		{
 			int32Hint: true,
 		},
 	],
-	"@stylistic/js/space-unary-ops": [
+	"@stylistic/space-unary-ops": [
 		2,
 		{
 			nonwords: false,
 			words: true,
 		},
 	],
-	"@stylistic/js/spaced-comment": [
+	"@stylistic/spaced-comment": [
 		2,
 		"always",
 		{
 			markers: ["/"],
 		},
 	],
-	"@stylistic/js/switch-colon-spacing": [
+	"@stylistic/switch-colon-spacing": [
 		2,
 		{
 			after: true,
 			before: false,
 		},
 	],
-	"@stylistic/js/template-curly-spacing": [2, "never"],
-	"@stylistic/js/template-tag-spacing": [2, "never"],
-	"@stylistic/js/wrap-iife": [2, "inside"],
-	"@stylistic/js/wrap-regex": 0,
-	"@stylistic/js/yield-star-spacing": [
+	"@stylistic/template-curly-spacing": [2, "never"],
+	"@stylistic/template-tag-spacing": [2, "never"],
+	"@stylistic/wrap-iife": [2, "inside"],
+	"@stylistic/wrap-regex": 0,
+	"@stylistic/yield-star-spacing": [
 		2,
 		{
 			after: true,
@@ -758,9 +756,7 @@ const config: TSESLint.FlatConfig.ConfigArray = [
 			jsdoc: eslintPluginJsdoc,
 			unicorn: eslintPluginUnicorn,
 			promise: eslintPluginPromise,
-			"@stylistic/js": eslintPluginStylistic,
-			"@stylistic/jsx": eslintPluginStylisticJsx,
-			"@stylistic/ts": eslintPluginStylisticTs,
+			"@stylistic": eslintPluginStylistic,
 		},
 		rules,
 		settings,

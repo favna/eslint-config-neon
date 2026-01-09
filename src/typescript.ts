@@ -265,37 +265,19 @@ const rules: TSESLint.FlatConfig.Rules = {
 
 	"require-await": 0,
 
-	// Disable Stylistic JS rules implemented in Stylistic TS
-	"@stylistic/ts/type-annotation-spacing": 2,
-	"@stylistic/ts/keyword-spacing": [
+	// Stylistic
+	"@stylistic/type-annotation-spacing": 2,
+	"@stylistic/keyword-spacing": [
 		2,
 		{
 			after: true,
 			before: true,
 		},
 	],
-	"@stylistic/ts/no-extra-parens": 2,
-	"@stylistic/ts/no-extra-semi": 2,
-	"@stylistic/js/brace-style": 0,
-	"@stylistic/js/comma-dangle": 0,
-	"@stylistic/js/comma-spacing": 0,
-	"@stylistic/js/func-call-spacing": 0,
-	"@stylistic/js/indent": 0,
-	"@stylistic/js/keyword-spacing": 0,
-	"@stylistic/js/lines-between-class-members": 0,
-	"@stylistic/js/no-extra-parens": 0,
-	"@stylistic/js/no-extra-semi": 0,
-	"@stylistic/js/object-curly-spacing": 0,
-	"@stylistic/js/padding-line-between-statements": 0,
-	"@stylistic/js/quotes": 0,
-	"@stylistic/js/semi": 0,
-	"@stylistic/js/space-before-blocks": 0,
-	"@stylistic/js/space-before-function-paren": 0,
-	"@stylistic/js/space-infix-ops": 0,
-
-	// Stylistic
-	"@stylistic/ts/brace-style": [2, "1tbs", { allowSingleLine: false }],
-	"@stylistic/ts/comma-dangle": [
+	"@stylistic/no-extra-parens": 2,
+	"@stylistic/no-extra-semi": 2,
+	"@stylistic/brace-style": [2, "1tbs", { allowSingleLine: false }],
+	"@stylistic/comma-dangle": [
 		2,
 		{
 			arrays: "always-multiline",
@@ -308,11 +290,11 @@ const rules: TSESLint.FlatConfig.Rules = {
 			tuples: "never",
 		},
 	],
-	"@stylistic/ts/comma-spacing": [2, { after: true, before: false }],
-	"@stylistic/ts/func-call-spacing": [2, "never"],
-	"@stylistic/ts/indent": [2, "tab"],
-	"@stylistic/ts/lines-between-class-members": [2, "always"],
-	"@stylistic/ts/member-delimiter-style": [
+	"@stylistic/comma-spacing": [2, { after: true, before: false }],
+	"@stylistic/function-call-spacing": [2, "never"],
+	"@stylistic/indent": [2, "tab"],
+	"@stylistic/lines-between-class-members": [2, "always"],
+	"@stylistic/member-delimiter-style": [
 		2,
 		{
 			multiline: { delimiter: "semi", requireLast: true },
@@ -320,16 +302,13 @@ const rules: TSESLint.FlatConfig.Rules = {
 			singleline: { delimiter: "semi", requireLast: true },
 		},
 	],
-	"@stylistic/ts/object-curly-spacing": [2, "always"],
-	"@stylistic/ts/padding-line-between-statements": [
-		2,
-		{ blankLine: "always", next: "*", prev: "multiline-block-like" },
-	],
-	"@stylistic/ts/quotes": [2, "double"],
-	"@stylistic/ts/semi": [2, "always"],
-	"@stylistic/ts/space-before-blocks": [2, "always"],
-	"@stylistic/ts/space-before-function-paren": [2, { anonymous: "always", named: "never", asyncArrow: "always" }],
-	"@stylistic/ts/space-infix-ops": [2, { int32Hint: true }],
+	"@stylistic/object-curly-spacing": [2, "always"],
+	"@stylistic/padding-line-between-statements": [2, { blankLine: "always", next: "*", prev: "multiline-block-like" }],
+	"@stylistic/quotes": [2, "double"],
+	"@stylistic/semi": [2, "always"],
+	"@stylistic/space-before-blocks": [2, "always"],
+	"@stylistic/space-before-function-paren": [2, { anonymous: "always", named: "never", asyncArrow: "always" }],
+	"@stylistic/space-infix-ops": [2, { int32Hint: true }],
 
 	// Additional rules
 	"consistent-return": 0,
@@ -397,14 +376,17 @@ const settings: TSESLint.FlatConfig.Settings = {
 	"import-x/extensions": [...defaultExtensions, ".cts", ".mts", ".cjs", ".mjs"],
 };
 
-const config: TSESLint.FlatConfig.ConfigArray = tseslint.config(...tseslint.configs.recommended, {
-	plugins: {
-		sonarjs: eslintPluginSonarjs,
-		tsdoc: eslintPluginTsdoc,
-		"typescript-sort-keys": fixupPluginRules(eslintPluginTypescriptSortKeys),
+const config: TSESLint.FlatConfig.ConfigArray = [
+	...tseslint.configs.recommended,
+	{
+		plugins: {
+			sonarjs: eslintPluginSonarjs,
+			tsdoc: eslintPluginTsdoc,
+			"typescript-sort-keys": fixupPluginRules(eslintPluginTypescriptSortKeys),
+		},
+		rules,
+		settings,
 	},
-	rules,
-	settings,
-});
+];
 
 export default config;

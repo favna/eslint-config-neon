@@ -1,5 +1,5 @@
-import { findFilesRecursivelyStringEndsWith } from "@sapphire/node-utilities";
 import { rename } from "node:fs/promises";
+import { findFilesRecursivelyStringEndsWith } from "@sapphire/node-utilities";
 
 const distUrl = new URL("../dist/esm/", import.meta.url);
 
