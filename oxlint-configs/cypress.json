@@ -1,6 +1,8 @@
 {
-	"plugins": ["import"],
-	"rules": {
-		"import/unambiguous": 0
-	}
+  "plugins": [
+    "import"
+  ],
+  "rules": {
+    "import/unambiguous": 0
+  }
 }

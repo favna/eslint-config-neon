@@ -1,7 +1,9 @@
 {
-	"plugins": ["import"],
-	"rules": {
-		"no-restricted-globals": 0,
-		"import/extensions": 0
-	}
+  "plugins": [
+    "import"
+  ],
+  "rules": {
+    "no-restricted-globals": 0,
+    "import/extensions": 0
+  }
 }

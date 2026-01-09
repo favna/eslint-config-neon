@@ -5,5 +5,5 @@
 	"quoteProps": "as-needed",
 	"trailingComma": "all",
 	"endOfLine": "lf",
-	"ignorePatterns": [".yarn"]
+	"ignorePatterns": [".yarn", "oxlint-configs"]
 }
