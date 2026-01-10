@@ -42,7 +42,7 @@ const rules: TSESLint.FlatConfig.Rules = {
 	"id-length": [
 		2,
 		{
-			exceptions: ["_", "$", "a", "b", "x", "y"],
+			exceptions: ["_", "$", "a", "b", "v", "x", "y"],
 			min: 2,
 		},
 	],

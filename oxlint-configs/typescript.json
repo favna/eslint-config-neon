@@ -59,10 +59,7 @@
     ],
     "typescript/ban-tslint-comment": 2,
     "typescript/consistent-indexed-object-style": 0,
-    "typescript/consistent-type-definitions": [
-      2,
-      "type"
-    ],
+    "typescript/consistent-type-definitions": 0,
     "typescript/consistent-type-imports": [
       2,
       {
@@ -176,6 +173,13 @@
       {
         "ignoreArrowShorthand": true,
         "ignoreVoidOperator": false
+      }
+    ],
+    "typescript/no-duplicate-type-constituents": [
+      2,
+      {
+        "ignoreParameters": true,
+        "ignoreProperties": true
       }
     ],
     "typescript/no-for-in-array": 2,

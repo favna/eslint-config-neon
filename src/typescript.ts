@@ -35,7 +35,7 @@ const rules: TSESLint.FlatConfig.Rules = {
 			objectLiteralTypeAssertions: "allow",
 		},
 	],
-	"@typescript-eslint/consistent-type-definitions": [2, "type"],
+	"@typescript-eslint/consistent-type-definitions": 0,
 	"@typescript-eslint/consistent-type-exports": [
 		2,
 		{
@@ -69,6 +69,10 @@ const rules: TSESLint.FlatConfig.Rules = {
 		},
 	],
 	"@typescript-eslint/no-duplicate-enum-values": 2,
+	"@typescript-eslint/no-duplicate-type-constituents": [2, {
+		ignoreParameters: true,
+		ignoreProperties: true,
+	}],
 	"@typescript-eslint/no-dynamic-delete": 2,
 	"@typescript-eslint/no-empty-function": 0,
 	"@typescript-eslint/no-empty-interface": [
