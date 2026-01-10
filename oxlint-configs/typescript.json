@@ -178,8 +178,8 @@
     "typescript/no-duplicate-type-constituents": [
       2,
       {
-        "ignoreParameters": true,
-        "ignoreProperties": true
+        "ignoreIntersections": false,
+        "ignoreUnions": false
       }
     ],
     "typescript/no-for-in-array": 2,

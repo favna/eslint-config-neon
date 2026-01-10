@@ -70,8 +70,8 @@ const rules: TSESLint.FlatConfig.Rules = {
 	],
 	"@typescript-eslint/no-duplicate-enum-values": 2,
 	"@typescript-eslint/no-duplicate-type-constituents": [2, {
-		ignoreParameters: true,
-		ignoreProperties: true,
+		ignoreIntersections: false,
+		ignoreUnions: false,
 	}],
 	"@typescript-eslint/no-dynamic-delete": 2,
 	"@typescript-eslint/no-empty-function": 0,
