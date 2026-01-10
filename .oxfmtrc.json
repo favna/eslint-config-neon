@@ -5,5 +5,10 @@
 	"quoteProps": "as-needed",
 	"trailingComma": "all",
 	"endOfLine": "lf",
-	"ignorePatterns": [".yarn", "oxlint-configs"]
+	"ignorePatterns": [".yarn", "oxlint-configs"],
+	"experimentalSortImports": {
+		"groups": [["builtin"], ["external"], ["internal"], ["parent"], ["sibling"], ["index"]],
+		"ignoreCase": false,
+		"newlinesBetween": false
+	}
 }

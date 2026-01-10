@@ -69,10 +69,13 @@ const rules: TSESLint.FlatConfig.Rules = {
 		},
 	],
 	"@typescript-eslint/no-duplicate-enum-values": 2,
-	"@typescript-eslint/no-duplicate-type-constituents": [2, {
-		ignoreIntersections: false,
-		ignoreUnions: false,
-	}],
+	"@typescript-eslint/no-duplicate-type-constituents": [
+		2,
+		{
+			ignoreIntersections: false,
+			ignoreUnions: false,
+		},
+	],
 	"@typescript-eslint/no-dynamic-delete": 2,
 	"@typescript-eslint/no-empty-function": 0,
 	"@typescript-eslint/no-empty-interface": [
