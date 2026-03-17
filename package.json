@@ -27,7 +27,7 @@
 	"type": "module",
 	"main": "dist/cjs/common.cjs",
 	"module": "dist/esm/common.mjs",
-	"types": "dist/cjs/common.d.ts",
+	"types": "dist/cjs/common.d.cts",
 	"exports": {
 		".": {
 			"import": {
@@ -266,8 +266,7 @@
 	"scripts": {
 		"gen-index": "tsx scripts/gen-index.ts",
 		"gen-oxlintrc": "tsx scripts/generate-oxlintrc.ts",
-		"build": "yarn gen-index && yarn gen-oxlintrc && tsup && yarn fix-mts-types",
-		"fix-mts-types": "tsx scripts/fix-tsup-type-files.ts",
+		"build": "yarn gen-index && yarn gen-oxlintrc && tsdown",
 		"lint": "yarn build && oxfmt --check && oxlint --type-aware src",
 		"format": "yarn build && oxfmt && oxlint --type-aware src --fix --fix-suggestions",
 		"fmt": "yarn format",
@@ -316,13 +315,12 @@
 	"devDependencies": {
 		"@sapphire/node-utilities": "^1.0.2",
 		"cross-env": "^10.1.0",
-		"esbuild-plugin-file-path-extensions": "^2.1.4",
 		"eslint": "^10.0.3",
 		"eslint-plugin-oxlint": "^1.56.0",
 		"oxfmt": "^0.41.0",
 		"oxlint": "^1.56.0",
 		"prettier": "^3.8.1",
-		"tsup": "^8.5.1",
+		"tsdown": "^0.21.4",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3"
 	},
